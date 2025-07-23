@@ -6,7 +6,15 @@
 import scrapy
 
 
-class BricosimplonItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class CategoryItem(scrapy.Item):
+    name = scrapy.Field()
+    url = scrapy.Field()
+    category_id = scrapy.Field()
+    parent_category = scrapy.Field()
+
+class ProductItem(scrapy.Item):
+    name = scrapy.Field()
+    price = scrapy.Field()
+    url = scrapy.Field()
+    product_id = scrapy.Field()
+    category = scrapy.Field()

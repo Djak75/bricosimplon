@@ -11,3 +11,10 @@ from itemadapter import ItemAdapter
 class BricosimplonPipeline:
     def process_item(self, item, spider):
         return item
+    
+
+# bricosimplon/pipelines.py
+class CleanProductPipeline:
+    def process_item(self, item, spider):
+        item['name'] = item['name'].strip().title()
+        return item
