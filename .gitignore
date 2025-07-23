@@ -1,0 +1,26 @@
+# Environnement virtuel
+venv/
+env/
+.venv/
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Fichiers de logs
+*.log
+
+# Fichiers de configuration perso
+*.env
+.env.*
+
+# Dossiers spécifiques à l'IDE
+.vscode/
+.idea/
+
+# Fichiers Mac spécifiques (facultatif)
+.DS_Store
+
+# Fichiers Jupyter
+.ipynb_checkpoints/
