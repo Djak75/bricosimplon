@@ -14,6 +14,8 @@ NEWSPIDER_MODULE = "bricosimplon.spiders"
 
 ADDONS = {}
 
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0'
+USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "bricosimplon (+http://www.yourdomain.com)"
