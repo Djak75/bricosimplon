@@ -3,6 +3,12 @@ venv/
 env/
 .venv/
 
+# Ignore fichier csv
+*.csv
+
+# Ignore scrapy
+.scrapy
+
 # Cache Python
 __pycache__/
 *.py[cod]
