@@ -30,3 +30,5 @@ __pycache__/
 
 # Fichiers Jupyter
 .ipynb_checkpoints/
+
+data
