@@ -20,30 +20,50 @@ class VenessensCategoriesSpider(scrapy.Spider):
     def parse(self, response):
         seen = set()
 
-        # On boucle sur chaque catégorie principale
-        for menu_id, parent_name in self.category_parents.items():
-            # Sélecteur CSS qui cible les liens dans ce menu spécifique
+        # On boucle sur chaque menu principal (catégorie parente)
+        for menu_id, name in self.category_parents.items():
+            # On extrait l'ID numérique du menu (ex: "menu-item-1623" devient "1623")
+            match_parent = re.search(r'(\d+)', menu_id)
+            category_id = f"cat_id_{match_parent.group(1)}" if match_parent else menu_id
+            url = urljoin(response.url, response.css(f'#{menu_id} > a::attr(href)').get())
+
+
+            # Item pour la catégorie principale (page d’accueil comme parent)
+            item = CategoryItem()
+            item['unique_id'] = f"venessens.welcome.{category_id}"
+            item['id_uppercat'] = "welcome_venessens"
+            item['category_id'] = category_id
+            item['name'] = name
+            item['url'] = url
+            item['is_page_list'] = 0
+            yield item
+
+
+            # Sélecteur CSS pour trouver tous les liens vers les sous-catégories
             links = response.css(f'#{menu_id} li.menu-item a.elementor-item')
 
+            # On boucle sur tous les liens trouvés
             for link in links:
-                name = link.css('::text').get().strip()
-                url = link.css('::attr(href)').get()
-                full_url = urljoin(response.url, url)
+                sub_name = link.css('::text').get().strip()
+                sub_url = urljoin(response.url, link.css('::attr(href)').get())
 
-                if (name, full_url) in seen:
-                    continue  # On ignore les doublons
-                seen.add((name, full_url))
+                # Si ce lien a déjà été vu, on le saute pour éviter les doublons
+                if (sub_name, sub_url) in seen:
+                    continue
+                seen.add((sub_name, sub_url))
 
-                # On récupère le numéro unique de l'élément CSS (ex: menu-item-505)
+                # On remonte dans le DOM pour récupérer la classe CSS contenant l’ID numérique (ex: menu-item-505)
                 li_class = link.xpath('ancestor::li[1]/@class').get()
-                match = re.search(r'menu-item-(\d+)', li_class)
-                category_id = match.group(1) if match else full_url
+                match_child = re.search(r'menu-item-(\d+)', li_class)
+                sub_id = f"cat_id_{match_child.group(1)}" if match_child else "unknown"
 
-                # On remplit notre item
-                item = CategoryItem()
-                item['name'] = name
-                item['url'] = full_url
-                item['category_id'] = category_id
-                item['parent_category'] = parent_name
+                # On crée l’item pour la sous-catégorie
+                sub_item = CategoryItem()
+                sub_item['name'] = sub_name
+                sub_item['url'] = sub_url
+                sub_item['category_id'] = sub_id
+                sub_item['id_uppercat'] = category_id
+                sub_item['unique_id'] = f"venessens.{category_id}.{sub_id}"
+                sub_item['is_page_list'] = 1
 
-                yield item
+                yield sub_item

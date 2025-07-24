@@ -88,3 +88,13 @@ ITEM_PIPELINES = {
 
 # Set settings whose default value is deprecated to a future-proof value
 FEED_EXPORT_ENCODING = "utf-8"
+
+# Definit l'ordre des champs dans le fichier de sortie
+FEED_EXPORT_FIELDS = [
+    "unique_id",
+    "id_uppercat",
+    "category_id",
+    "name",
+    "url",
+    "is_page_list"
+]
