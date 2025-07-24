@@ -10,7 +10,8 @@ class CategoryItem(scrapy.Item):
     name = scrapy.Field()
     url = scrapy.Field()
     category_id = scrapy.Field()
-    parent_category = scrapy.Field()
+    id_uppercat = scrapy.Field()  
+    unique_id = scrapy.Field()
 
 class ProductItem(scrapy.Item):
     name = scrapy.Field()
