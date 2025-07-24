@@ -35,6 +35,7 @@ class VenessensCategoriesSpider(scrapy.Spider):
             item['category_id'] = category_id
             item['name'] = name
             item['url'] = url
+            item['is_page_list'] = 0
             yield item
 
 
@@ -63,5 +64,6 @@ class VenessensCategoriesSpider(scrapy.Spider):
                 sub_item['category_id'] = sub_id
                 sub_item['id_uppercat'] = category_id
                 sub_item['unique_id'] = f"venessens.{category_id}.{sub_id}"
+                sub_item['is_page_list'] = 1
 
                 yield sub_item

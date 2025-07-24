@@ -12,6 +12,7 @@ class CategoryItem(scrapy.Item):
     category_id = scrapy.Field()
     id_uppercat = scrapy.Field()  
     unique_id = scrapy.Field()
+    is_page_list = scrapy.Field() 
 
 class ProductItem(scrapy.Item):
     name = scrapy.Field()

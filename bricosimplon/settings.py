@@ -95,5 +95,6 @@ FEED_EXPORT_FIELDS = [
     "id_uppercat",
     "category_id",
     "name",
-    "url"
+    "url",
+    "is_page_list"
 ]
