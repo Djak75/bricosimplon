@@ -73,8 +73,16 @@ class CsvExportPipeline:
         os.makedirs('data', exist_ok=True)
 
     def process_item(self, item, spider):
-        category = item.get('category', 'default')
+        # Ce pipeline ne s'occupe que de l'export des ProductItem
+        if not isinstance(item, ProductItem):
+            # Pour tout autre type d'item (ex: CategoryItem), on le laisse passer
+            # pour que d'autres pipelines ou l'exporteur de Scrapy le gèrent.
+            return item
+        
+        adapter = ItemAdapter(item)
+        category = adapter.get('category', 'default')
         filename = os.path.join('data', f'{category}.csv')
+
         if category not in self.files:
             # Utiliser 'w' pour écrire un nouveau fichier à chaque fois
             f = open(filename, 'w', newline='', encoding='utf-8')
