@@ -10,7 +10,7 @@ from itemadapter import ItemAdapter
 from scrapy.exceptions import DropItem
 import csv
 import os
-# Importer les classes d'items pour vérifier leur type
+import pandas as pd
 from .items import CategoryItem, ProductItem
 
 
@@ -65,6 +65,30 @@ class CleanProductPipeline:
 
         return item
 
+class CategoryExportPipeline:
+    def open_spider(self, spider):
+        # Ce pipeline ne doit s'activer que pour le spider des catégories
+        if spider.name == 'venessens_categories':
+            os.makedirs('data', exist_ok=True)
+            self.file = open(os.path.join('data', 'categories.csv'), 'w', newline='', encoding='utf-8')
+            # Utilise dynamiquement tous les champs définis dans votre CategoryItem
+            self.writer = csv.DictWriter(self.file, fieldnames=CategoryItem.fields.keys())
+            self.writer.writeheader()
+
+    def process_item(self, item, spider):
+        # Ce pipeline ne s'applique qu'aux CategoryItem
+        if not isinstance(item, CategoryItem):
+            return item
+
+        # On écrit la ligne seulement si le writer a été initialisé (pour le bon spider)
+        if hasattr(self, 'writer'):
+            self.writer.writerow(ItemAdapter(item).asdict())
+        return item
+
+    def close_spider(self, spider):
+        if hasattr(self, 'file'):
+            self.file.close()
+
 class CsvExportPipeline:
     def open_spider(self, spider):
         self.files = {}
@@ -98,3 +122,26 @@ class CsvExportPipeline:
     def close_spider(self, spider):
         for f in self.files.values():
             f.close()
+
+        # Fusion des produits en un seul fichier CSV
+        fusionner_csv()
+
+
+# Defintion de la fonction de fusion des fichiers CSV
+def fusionner_csv():
+    directory_path = 'data'
+    # Je récupère tous les noms des fichiers CSV a fusionner 
+    csv_files = []
+    for fichier in os.listdir(directory_path):
+        if fichier.endswith('.csv') and fichier != 'venessens_all_products.csv':
+            csv_files.append(fichier)
+    # Je crée une liste de dataframes à partir des fichiers CSV
+    list_dataframes = []
+    for fichier in csv_files:
+        file_path = os.path.join(directory_path, fichier)
+        df = pd.read_csv(file_path)
+        list_dataframes.append(df)
+    # Je concatène tous les dataframes en un seul
+    combined_df = pd.concat(list_dataframes, ignore_index=True)
+    # Je sauvegarde le dataframe combiné dans un nouveau fichier CSV
+    combined_df.to_csv(os.path.join(directory_path, 'venessens_all_products.csv'), index=False)
