@@ -4,6 +4,11 @@ from urllib.parse import urljoin
 import re # Bibiothèque regex pour extraire l'ID de la catégorie
 
 class VenessensCategoriesSpider(scrapy.Spider):
+    """
+    Spider that extracts product category information from the main navigation menu
+    of the venessens-parquet.com website. It captures both parent and child categories,
+    and exports them to a CSV file with fields like unique_id, name, URL, and hierarchy.
+    """
     name = "venessens_categories"
     allowed_domains = ["venessens-parquet.com"]
     start_urls = ["https://venessens-parquet.com"]
@@ -30,13 +35,16 @@ class VenessensCategoriesSpider(scrapy.Spider):
     }
 
     def parse(self, response):
+        """
+        Parse the homepage navigation menu and extract parent and subcategory links.
+        Creates CategoryItem instances for each category found.
+        """
         # On boucle sur chaque menu principal (catégorie parente)
         for menu_id, name in self.category_parents.items():
             # On extrait l'ID numérique du menu (ex: "menu-item-1623" devient "1623")
             match_parent = re.search(r'(\d+)', menu_id)
             category_id = f"cat_id_{match_parent.group(1)}" if match_parent else menu_id
             url = urljoin(response.url, response.css(f'#{menu_id} > a::attr(href)').get())
-
 
             # Item pour la catégorie principale (page d’accueil comme parent)
             item = CategoryItem()

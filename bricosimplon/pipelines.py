@@ -15,10 +15,16 @@ from .items import CategoryItem, ProductItem
 
 
 class DuplicatesCategoryPipeline:
+    """
+    Pipeline to remove duplicate CategoryItem objects based on (name, url) combination.
+    """
     def __init__(self):
         self.seen = set()
 
     def process_item(self, item, spider):
+        """
+        Process each item and drop it if it's a duplicate CategoryItem.
+        """
         # Ce pipeline ne s'applique qu'aux CategoryItem
         if not isinstance(item, CategoryItem):
             return item
@@ -33,7 +39,14 @@ class DuplicatesCategoryPipeline:
             return item
 
 class CleanProductPipeline:
+    """
+    Pipeline to clean fields of ProductItem: strips and formats product_id, price, and name.
+    Filters out products with dummy ID '999999999'.
+    """
     def process_item(self, item, spider):
+        """
+        Clean and normalize the fields of ProductItem.
+        """
         # Ce pipeline ne s'applique qu'aux ProductItem
         if not isinstance(item, ProductItem):
             return item
@@ -52,6 +65,9 @@ class CleanProductPipeline:
             if euro_index != -1:
                 price = price[:euro_index]
 
+            price = price.strip().replace(',', '.')
+            adapter['price'] = price
+
         # Nettoyage name
         name = adapter.get('name')
         if name:
@@ -64,7 +80,13 @@ class CleanProductPipeline:
         return item
 
 class CategoryExportPipeline:
+    """
+    Pipeline to export CategoryItem data into a CSV file during spider execution.
+    """
     def open_spider(self, spider):
+        """
+        Initialize CSV writer only for the category spider.
+        """
         # Ce pipeline ne doit s'activer que pour le spider des catégories
         if spider.name == 'venessens_categories':
             os.makedirs('data', exist_ok=True)
@@ -74,6 +96,9 @@ class CategoryExportPipeline:
             self.writer.writeheader()
 
     def process_item(self, item, spider):
+        """
+        Write CategoryItem to CSV if the spider is the correct one.
+        """
         # Ce pipeline ne s'applique qu'aux CategoryItem
         if not isinstance(item, CategoryItem):
             return item
@@ -84,17 +109,30 @@ class CategoryExportPipeline:
         return item
 
     def close_spider(self, spider):
+        """
+        Close CSV file after spider finishes.
+        """
         if hasattr(self, 'file'):
             self.file.close()
 
 class CsvExportPipeline:
+    """
+    Pipeline to export ProductItem objects into separate CSV files per category,
+    and merge them into a single global CSV at the end.
+    """
     def open_spider(self, spider):
+        """
+        Prepare internal structures and ensure output directory exists.
+        """
         self.files = {}
         self.writers = {}
         # Créer le dossier de données s'il n'existe pas
         os.makedirs('data', exist_ok=True)
 
     def process_item(self, item, spider):
+        """
+        Write ProductItem to a category-specific CSV file.
+        """
         # Ce pipeline ne s'occupe que de l'export des ProductItem
         if not isinstance(item, ProductItem):
             # Pour tout autre type d'item (ex: CategoryItem), on le laisse passer
@@ -118,6 +156,9 @@ class CsvExportPipeline:
         return item
 
     def close_spider(self, spider):
+        """
+        Close all open CSV files and trigger merging into a single global file.
+        """
         for f in self.files.values():
             f.close()
         # Fusion des produits en un seul fichier CSV
@@ -125,6 +166,9 @@ class CsvExportPipeline:
 
 
     def fusionner_csv(self):
+        """
+        Merge all per-category CSV files into one single CSV file.
+        """
         directory_path = 'data'
         csv_files = [fichier for fichier in os.listdir(directory_path) if fichier.endswith('.csv') 
                      and fichier != 'venessens_all_products.csv' 
