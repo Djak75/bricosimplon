@@ -63,7 +63,8 @@ DOWNLOAD_DELAY = 1
 ITEM_PIPELINES = {
     'bricosimplon.pipelines.DuplicatesCategoryPipeline': 100,
     'bricosimplon.pipelines.CleanProductPipeline': 300,
-    'bricosimplon.pipelines.CsvExportPipeline': 400, 
+    'bricosimplon.pipelines.CategoryExportPipeline': 400,
+    'bricosimplon.pipelines.CsvExportPipeline': 500,
 
 }
 
