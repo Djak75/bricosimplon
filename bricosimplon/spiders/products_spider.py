@@ -9,10 +9,6 @@ class ProductsSpider(scrapy.Spider):
     allowed_domains = ["venessens-parquet.com"]
     start_urls = ["https://venessens-parquet.com/"]
 
-    #ferme spider après 6 pages
-    #custom_settings = {
-    #    'CLOSESPIDER_PAGECOUNT': 10
-    #}
 
     def __init__(self):
         super().__init__()

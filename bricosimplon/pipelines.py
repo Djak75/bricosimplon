@@ -10,20 +10,8 @@ from itemadapter import ItemAdapter
 from scrapy.exceptions import DropItem
 import csv
 import os
+import pandas as pd
 
-
-class BricosimplonPipeline:
-    def process_item(self, item, spider):
-        return item
-    
-
-# bricosimplon/pipelines.py
-'''
-class CleanProductPipeline:
-    def process_item(self, item, spider):
-        item['name'] = item['name'].strip().title()
-        return item
-'''
     
 # Reproduction de la logique de nettoyage de la méthode clean_data dans le pipeline
 
@@ -80,3 +68,27 @@ class CsvExportPipeline:
     def close_spider(self, spider):
             for f in self.files.values():
                 f.close()
+    # Fusion des produits en un seul fichier CSV
+            fusionner_csv()
+
+
+# Defintion de la fonction de fusion des fichiers CSV
+def fusionner_csv():
+    directory_path = 'data'
+    # Je récupère tous les noms des fichiers CSV a fusionner 
+    csv_files = []
+    for fichier in os.listdir(directory_path):
+        if fichier.endswith('.csv') and fichier != 'venessens_all_products.csv':
+            csv_files.append(fichier)
+    # Je crée une liste de dataframes à partir des fichiers CSV
+    list_dataframes = []
+    for fichier in csv_files:
+        file_path = os.path.join(directory_path, fichier)
+        df = pd.read_csv(file_path)
+        list_dataframes.append(df)
+    # Je concatène tous les dataframes en un seul
+    combined_df = pd.concat(list_dataframes, ignore_index=True)
+    # Je sauvegarde le dataframe combiné dans un nouveau fichier CSV
+    combined_df.to_csv(os.path.join(directory_path, 'venessens_all_products.csv'), index=False)
+
+    
