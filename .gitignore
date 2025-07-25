@@ -5,6 +5,7 @@ env/
 
 # Ignore fichier csv
 *.csv
+*.json
 
 # Ignore scrapy
 .scrapy
