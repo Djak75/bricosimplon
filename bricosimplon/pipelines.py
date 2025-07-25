@@ -66,9 +66,10 @@ class CsvExportPipeline:
 
     def process_item(self, item, spider):
         category = item.get('category', 'default')
-        filename = os.path.join('data', f'{category}.csv')
+        filename = os.path.join('bricosimplon', 'data', f'{category}.csv')
+        
         if category not in self.files:
-            os.makedirs('data', exist_ok=True)
+            os.makedirs(os.path.join('bricosimplon', 'data'), exist_ok=True)
             f = open(filename, 'w', newline='', encoding='utf-8')
             self.files[category] = f
             writer = csv.DictWriter(f, fieldnames=item.keys())
