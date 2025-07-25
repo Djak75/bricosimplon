@@ -10,9 +10,9 @@ class ProductsSpider(scrapy.Spider):
     start_urls = ["https://venessens-parquet.com/"]
 
     #ferme spider après 6 pages
-    #custom_settings = {
-    #    'CLOSESPIDER_PAGECOUNT': 10
-    #}
+    custom_settings = {
+        'CLOSESPIDER_PAGECOUNT': 10
+    }
 
     def __init__(self):
         super().__init__()
@@ -57,10 +57,10 @@ class ProductsSpider(scrapy.Spider):
 
     def determine_category(self, url):
         category_mapping = {
-            'parquets-dinterieur': 'parquets_interieur',
-            'parquets-exterieur': 'parquets_exterieur',
-            'habillage-mural': 'habillage_mural',
-            'accessoires': 'accessoires'
+            'parquets-dinterieur': 'Les Parquets D’Intérieur',
+            'parquets-exterieur': 'Les Parquets D’Extérieur',
+            'habillage-mural': 'Habillage Mural Latho',
+            'accessoires': 'Les Accessoires'
         }
         for pattern, category in category_mapping.items():
             if pattern in url:
