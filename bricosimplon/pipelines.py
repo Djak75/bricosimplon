@@ -10,74 +10,83 @@ from itemadapter import ItemAdapter
 from scrapy.exceptions import DropItem
 import csv
 import os
+# Importer les classes d'items pour vérifier leur type
+from .items import CategoryItem, ProductItem
 
 
-class BricosimplonPipeline:
+class DuplicatesCategoryPipeline:
+    def __init__(self):
+        self.seen = set()
+
     def process_item(self, item, spider):
-        return item
-    
+        # Ce pipeline ne s'applique qu'aux CategoryItem
+        if not isinstance(item, CategoryItem):
+            return item
 
-# bricosimplon/pipelines.py
-'''
+        adapter = ItemAdapter(item)
+        key = (adapter.get('name'), adapter.get('url'))
+
+        if key in self.seen:
+            raise DropItem(f"Doublon de catégorie détecté : {key}")
+        else:
+            self.seen.add(key)
+            return item
+
 class CleanProductPipeline:
     def process_item(self, item, spider):
-        item['name'] = item['name'].strip().title()
-        return item
-'''
-    
-# Reproduction de la logique de nettoyage de la méthode clean_data dans le pipeline
+        # Ce pipeline ne s'applique qu'aux ProductItem
+        if not isinstance(item, ProductItem):
+            return item
 
-class CleanProductPipeline:
-    def process_item(self, item, spider):
+        adapter = ItemAdapter(item)
+
         # Nettoyage product_id
-        product_id = item.get('product_id')
+        product_id = adapter.get('product_id')
         if product_id and product_id.startswith('Ref: '):
-            product_id = product_id.replace('Ref: ', '')
-        item['product_id'] = product_id
+            adapter['product_id'] = product_id.replace('Ref: ', '')
 
         # Nettoyage price
-        price = item.get('price')
+        price = adapter.get('price')
         if price:
             euro_index = price.find('€')
             if euro_index != -1:
                 price = price[:euro_index]
             price = re.sub(r'[^\d.,]', '', price)
-            price = price.replace(',', '.')
-        item['price'] = price
+            adapter['price'] = price.replace(',', '.')
 
         # Nettoyage name
-        name = item.get('name')
+        name = adapter.get('name')
         if name:
-            name = name.strip().lower()
-        item['name'] = name
+            adapter['name'] = name.strip().lower()
 
         # Filtrage
-        if item.get('product_id') == '999999999':
+        if adapter.get('product_id') == '999999999':
             raise DropItem("Produit ignoré")
 
         return item
-    
-# Reproduction de la logique d'exportation en CSV dans le pipeline
 
 class CsvExportPipeline:
     def open_spider(self, spider):
         self.files = {}
         self.writers = {}
+        # Créer le dossier de données s'il n'existe pas
+        os.makedirs('data', exist_ok=True)
 
     def process_item(self, item, spider):
         category = item.get('category', 'default')
-        filename = os.path.join('bricosimplon', 'data', f'{category}.csv')
-        
+        filename = os.path.join('data', f'{category}.csv')
         if category not in self.files:
-            os.makedirs(os.path.join('bricosimplon', 'data'), exist_ok=True)
+            # Utiliser 'w' pour écrire un nouveau fichier à chaque fois
             f = open(filename, 'w', newline='', encoding='utf-8')
             self.files[category] = f
-            writer = csv.DictWriter(f, fieldnames=item.keys())
+            writer = csv.DictWriter(f, fieldnames=adapter.field_names())
             writer.writeheader()
             self.writers[category] = writer
-        self.writers[category].writerow(dict(item))
+
+        self.writers[category].writerow(adapter.asdict())
+        
         return item
 
     def close_spider(self, spider):
-            for f in self.files.values():
-                f.close()
+        for f in self.files.values():
+            f.close()

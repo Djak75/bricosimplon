@@ -61,8 +61,10 @@ DOWNLOAD_DELAY = 1
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'bricosimplon.pipelines.CleanProductPipeline': 300,
-   'bricosimplon.pipelines.CsvExportPipeline': 400, 
+    'bricosimplon.pipelines.DuplicatesCategoryPipeline': 100,
+    'bricosimplon.pipelines.CleanProductPipeline': 300,
+    'bricosimplon.pipelines.CsvExportPipeline': 400, 
+
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -89,12 +91,3 @@ ITEM_PIPELINES = {
 # Set settings whose default value is deprecated to a future-proof value
 FEED_EXPORT_ENCODING = "utf-8"
 
-# Definit l'ordre des champs dans le fichier de sortie
-FEED_EXPORT_FIELDS = [
-    "unique_id",
-    "id_uppercat",
-    "category_id",
-    "name",
-    "url",
-    "is_page_list"
-]
